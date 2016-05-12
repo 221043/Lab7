@@ -1,6 +1,7 @@
 package it.polito.tdp.dizionario.controller;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import it.polito.tdp.dizionario.model.Model;
@@ -44,6 +45,12 @@ public class DizionarioController {
 
     @FXML
     private Button btnReset;
+    
+    @FXML
+    private TextField txtArrivo;
+    
+    @FXML
+    private Button btnCammino;
 
     @FXML
     void doConnessi(ActionEvent event) {
@@ -56,6 +63,10 @@ public class DizionarioController {
     		String nodo = txtParola.getText();
     		if(lunghezza!=nodo.length()){
     			txtRisultato.setText("Incoerenza dimensioni");
+    			return;
+    		}
+    		if(!model.findParola(nodo)){
+    			txtRisultato.setText("Nodo non presente nel grafo");
     			return;
     		}
     		txtRisultato.setText(model.getConnessi(nodo).toString());
@@ -76,6 +87,7 @@ public class DizionarioController {
         	txtRisultato.setText(model.getGraph().toString());
         	btnVicini.setDisable(false);
         	btnConnessi.setDisable(false);
+        	btnCammino.setDisable(false);
     	} catch(NumberFormatException e){
     		txtRisultato.setText("Inserire valore numerico valido");
     	}	
@@ -88,6 +100,7 @@ public class DizionarioController {
     	txtRisultato.setText("");
     	txtNumero.clear();
     	txtParola.clear();
+    	btnCammino.setDisable(true);
     	this.model = new Model();
     }
 
@@ -109,6 +122,28 @@ public class DizionarioController {
     		txtRisultato.setText("Inserire valore numerico valido");
     	}	
     }
+    
+    @FXML
+    void doCammino(ActionEvent event) {
+    	String s1 = txtParola.getText();
+    	String s2 = txtArrivo.getText();
+    	if(s1.length()!=model.getLen() || s2.length()!=model.getLen()){
+    		txtRisultato.setText("Lunghezza parola errata!\n");
+    		return;
+    	}
+    	if(!model.findParola(s1) || !model.findParola(s2)){
+    		txtRisultato.setText("Nodi non presenti nel grafo");
+    		return;
+    	}
+    	List<String> cammino = model.getCammino(s1, s2);
+    	if(cammino==null){
+    		txtRisultato.setText("Vertici non connessi");
+    		return;
+    	}
+    	txtRisultato.setText("**"+s1+"-"+s2+"** ("+cammino.size()+" passi)\n");
+    	for(String p:cammino)
+    		txtRisultato.appendText("\t"+p+"\n");
+    }
 
     @FXML
     void initialize() {
@@ -119,7 +154,10 @@ public class DizionarioController {
         assert btnConnessi != null : "fx:id=\"btnConnessi\" was not injected: check your FXML file 'Dizionario.fxml'.";
         assert txtRisultato != null : "fx:id=\"txtRisultato\" was not injected: check your FXML file 'Dizionario.fxml'.";
         assert btnReset != null : "fx:id=\"btnReset\" was not injected: check your FXML file 'Dizionario.fxml'.";
-        
+        assert btnCammino != null : "fx:id=\"btnCammino\" was not injected: check your FXML file 'Dizionario.fxml'.";
+        assert txtArrivo != null : "fx:id=\"txtArrivo\" was not injected: check your FXML file 'Dizionario.fxml'.";
+
+        btnCammino.setDisable(true);
         btnVicini.setDisable(true);
         btnConnessi.setDisable(true);
      	txtRisultato.wrapTextProperty().set(true);
